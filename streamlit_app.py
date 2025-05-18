@@ -45,18 +45,14 @@ st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", format
 
 # --- Hàm xử lý kết quả ---
 def play(player_choice):
-    placeholder = st.empty()
+    st.subheader("Máy đang chọn chiêu thức...")
+    for i in range(10):
+        roll = random.choice(choices)
+        st.image(images[roll], width=150)
+        time.sleep(0.15)
+
     bot_choice = random.choice(choices)
-
-    with placeholder.container():
-        st.subheader("Máy đang chọn chiêu thức...")
-        for i in range(10):
-            roll = random.choice(choices)
-            st.image(images[roll], width=150)
-            time.sleep(0.15)
-            placeholder.empty()
-
-    placeholder.image(images[bot_choice], width=150, caption=f"Máy chọn: {bot_choice}")
+    st.image(images[bot_choice], width=150, caption=f"Máy chọn: {bot_choice}")
 
     # --- Tính kết quả ---
     if player_choice == bot_choice:
