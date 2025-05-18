@@ -9,6 +9,16 @@ icons = {"Song kiếm trảm": "✌", "Long quyền chưởng": "✊", "Ngũ đa
 # điểm số (sử dụng st.session_state để duy trì trạng thái)
 if 'score' not in st.session_state:
     st.session_state['score'] = {"win": 0, "lose": 0, "draw": 0}
+if 'player_choice' not in st.session_state:
+    st.session_state['player_choice'] = ""
+if 'computer_choice' not in st.session_state:
+    st.session_state['computer_choice'] = "❓" # Bắt đầu với dấu hỏi
+if 'result_text' not in st.session_state:
+    st.session_state['result_text'] = "🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha"
+if 'outcome' not in st.session_state:
+    st.session_state['outcome'] = ""
+if 'rolling' not in st.session_state:
+    st.session_state['rolling'] = False
 
 # Hàm tính kết quả trận đấu (GIỮ NGUYÊN)
 def get_result(player, computer):
@@ -40,24 +50,40 @@ def show_result_screen_streamlit(player_choice, computer_choice, result, outcome
     else:
         st.info("Hòa rồi!")
 
+# Hàm thực hiện hiệu ứng roll
+def roll():
+    for _ in range(30):  # Số lần "roll"
+        st.session_state['computer_choice'] = random.choice(choices)
+        time.sleep(0.05)  # Tốc độ "roll"
+        st.rerun() # Chạy lại script để cập nhật giao diện
+    # Sau khi "roll" xong, tính toán kết quả thật
+    computer_choice_final = random.choice(choices)
+    result, outcome = get_result(st.session_state['player_choice'], computer_choice_final)
+    st.session_state['computer_choice'] = computer_choice_final
+    st.session_state['result_text'] = result
+    st.session_state['outcome'] = outcome
+    st.session_state['rolling'] = False
+    st.rerun() # Chạy lại lần cuối để hiển thị kết quả cuối cùng
+
 # Xử lý khi người chơi chọn chiêu (THAY ĐỔI CHO STREAMLIT)
 def play_streamlit(choice):
-    computer_choice = random.choice(choices)
-    result, outcome = get_result(choice, computer_choice)
     st.session_state['player_choice'] = choice
-    st.session_state['computer_choice'] = computer_choice
-    st.session_state['result'] = result
-    st.session_state['outcome'] = outcome
+    st.session_state['computer_choice'] = "❓" # Reset hiển thị của máy
+    st.session_state['result_text'] = "🤖 Bổn tọa đang chọn chiêu..."
+    st.session_state['outcome'] = ""
+    st.session_state['rolling'] = True
+    roll()
 
-# Đặt lại điểm số (GIỮ NGUYÊN)
+# Hàm đặt lại điểm số (GIỮ NGUYÊN)
 def reset_score():
     st.session_state['score'] = {"win": 0, "lose": 0, "draw": 0}
     st.session_state['player_choice'] = ""
-    st.session_state['computer_choice'] = ""
-    st.session_state['result'] = ""
+    st.session_state['computer_choice'] = "❓"
+    st.session_state['result_text'] = "🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha"
     st.session_state['outcome'] = ""
+    st.session_state['rolling'] = False
 
-# Hiển thị tổng kết (THAY ĐỔI CHO STREAMLIT)
+# Hàm hiển thị tổng kết (THAY ĐỔI CHO STREAMLIT)
 def show_summary_streamlit():
     st.subheader("📜 Kết quả tỉ thí võ công")
     st.markdown(f"**✅ Thắng:** {st.session_state['score']['win']} | **❌ Bại:** {st.session_state['score']['lose']} | **⚖️ Hòa:** {st.session_state['score']['draw']}")
@@ -79,20 +105,37 @@ st.markdown(f"**Điểm số:** ✅ {st.session_state['score']['win']} | ❌ {st
 
 st.markdown("---")
 
-col_buttons = st.columns(3)
-if col_buttons[0].button(f"✌ {choices[0]}"):
-    play_streamlit(choices[0])
-if col_buttons[1].button(f"✊ {choices[1]}"):
-    play_streamlit(choices[1])
-if col_buttons[2].button(f"🖐 {choices[2]}"):
-    play_streamlit(choices[2])
+col_player, col_vs, col_comp = st.columns(3)
+
+with col_player:
+    if st.session_state['player_choice']:
+        st.markdown(f"👤 Ngươi ra chiêu: **{st.session_state['player_choice']}** {icons[st.session_state['player_choice']]}")
+    else:
+        st.markdown("👤 Ngươi:")
+
+with col_vs:
+    st.markdown("## VS")
+
+with col_comp:
+    st.markdown(f"🤖 Bổn tọa chọn: **{st.session_state['computer_choice']}** {icons.get(st.session_state['computer_choice'], '')}")
 
 st.markdown("---")
 
-if 'result' in st.session_state and st.session_state['result']:
-    show_result_screen_streamlit(st.session_state['player_choice'], st.session_state['computer_choice'], st.session_state['result'], st.session_state['outcome'])
+col_buttons = st.columns(3)
+if not st.session_state['rolling']:
+    if col_buttons[0].button(f"✌ {choices[0]}"):
+        play_streamlit(choices[0])
+    if col_buttons[1].button(f"✊ {choices[1]}"):
+        play_streamlit(choices[1])
+    if col_buttons[2].button(f"🖐 {choices[2]}"):
+        play_streamlit(choices[2])
 else:
-    st.info("🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha")
+    st.info("🤖 Bổn tọa đang thi triển chiêu thức...")
+
+st.markdown("---")
+
+if 'result_text' in st.session_state and st.session_state['result_text']:
+    st.info(st.session_state['result_text'])
 
 st.markdown("---")
 
