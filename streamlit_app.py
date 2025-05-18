@@ -41,12 +41,12 @@ def show_result_screen(player_choice, computer_choice, result, outcome):
 
     player_line = tk.Frame(result_window, bg=bg_color)
     player_line.pack(pady=10)
-    tk.Label(player_line, text="Ngươi xuất chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
-    tk.Label(player_line, text=icons[player_choice], font=("Arial", 50), bg=bg_color).pack(side="left")
+    st.Label(player_line, text="Ngươi xuất chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
+    st.Label(player_line, text=icons[player_choice], font=("Arial", 50), bg=bg_color).pack(side="left")
 
     comp_line = tk.Frame(result_window, bg=bg_color)
     comp_line.pack(pady=10)
-    tk.Label(comp_line, text="Bổn tọa chọn chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
+    st.Label(comp_line, text="Bổn tọa chọn chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
     comp_icon = tk.Label(comp_line, text="❓", font=("Arial", 50), bg=bg_color)
     comp_icon.pack(side="left")
 
@@ -115,8 +115,8 @@ def show_summary():
     summary_window.geometry("1600x1000")
     summary_window.config(bg="#fff8dc")
 
-    tk.Label(summary_window, text="📜 Kết quả tỉ thí:", font=("Arial", 16, "bold"), bg="#fff8dc").pack(pady=10)
-    tk.Label(summary_window, text=f"✅ Thắng: {score['win']} | ❌ Bại: {score['lose']} | ⚖️ Hòa: {score['draw']}", font=("Arial", 14), bg="#fff8dc").pack(pady=10)
+    st.Label(summary_window, text="📜 Kết quả tỉ thí:", font=("Arial", 16, "bold"), bg="#fff8dc").pack(pady=10)
+    st.Label(summary_window, text=f"✅ Thắng: {score['win']} | ❌ Bại: {score['lose']} | ⚖️ Hòa: {score['draw']}", font=("Arial", 14), bg="#fff8dc").pack(pady=10)
 
     if score["win"] > score["lose"]:
         comment = "🔥 Không thể nào...ta đã thua. Ngươi quả là cao thủ, bổn tọa bái phục!"
@@ -125,7 +125,7 @@ def show_summary():
     else:
         comment = "⚖️ Thế cục ngang tài ngang sức, tái đấu mới rõ anh hùng!"
 
-    tk.Label(summary_window, text=comment, font=("Arial", 12, "italic"), bg="#fff8dc", fg="#8b4513").pack(pady=20)
+    st.Label(summary_window, text=comment, font=("Arial", 12, "italic"), bg="#fff8dc", fg="#8b4513").pack(pady=20)
 
 # Giao diện chính
 root = tk.Tk()
@@ -133,7 +133,7 @@ root.title("⚔️ Võ Lâm Tranh Đấu")
 root.geometry("1600x900")
 root.configure(bg="#f0f4f8")
 
-tk.Label(root, text="🕹 Võ Lâm Tranh Đấu", font=("Arial", 20, "bold"), bg="#f0f4f8", fg="#333").pack(pady=20)
+st.Label(root, text="🕹 Võ Lâm Tranh Đấu", font=("Arial", 20, "bold"), bg="#f0f4f8", fg="#333").pack(pady=20)
 
 player_choice_label = tk.Label(root, text="👤 Ngươi ra chiêu: ", font=("Arial", 14), bg="#f0f4f8")
 player_choice_label.pack(pady=10)
@@ -147,6 +147,6 @@ score_label.pack(pady=10)
 button_frame = tk.Frame(root, bg="#f0f4f8")
 button_frame.pack(pady=20)
 
-tk.Button(button_frame, text="✌ Song kiếm trảm", width=20, font=("Arial", 20), command=lambda: play("Song kiếm trảm")).grid(row=0, column=0, padx=10)
-tk.Button(button_frame, text="✊ Long quyền chưởng", width=20, font=("Arial", 20), command=lambda: play("Long quyền chưởng")).grid(row=0, column=1, padx=10)
-tk.Button(button_frame, text="🖐 Ngũ đao phi vũ", width=20, font=("Arial", 20), command=lambda: play("Ngũ đao phi vũ")).grid(row=0, column=2,)
+st.Button(button_frame, text="✌ Song kiếm trảm", width=20, font=("Arial", 20), command=lambda: play("Song kiếm trảm")).grid(row=0, column=0, padx=10)
+st.Button(button_frame, text="✊ Long quyền chưởng", width=20, font=("Arial", 20), command=lambda: play("Long quyền chưởng")).grid(row=0, column=1, padx=10)
+st.Button(button_frame, text="🖐 Ngũ đao phi vũ", width=20, font=("Arial", 20), command=lambda: play("Ngũ đao phi vũ")).grid(row=0, column=2,)
