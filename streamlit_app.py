@@ -1,5 +1,4 @@
 import streamlit as st
-import tkinter as tk
 import random
 import threading
 
