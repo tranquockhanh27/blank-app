@@ -3,87 +3,87 @@ import random
 import time
 from streamlit_extras.audio import audio_player
 
-# --- Cấu hình ---
+# Cấu hình trang
 st.set_page_config(page_title="Võ Lâm Tranh Đấu", page_icon="⚔️", layout="centered")
 
-# --- Nhạc nền ---
-audio_player("assets/bgm.mp3", autoplay=True, loop=True)
+# Nhạc nền (link file hoặc mp3 URL)
+audio_url = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_f58dfc7b37.mp3?filename=epic-cinematic-action-trailer-111062.mp3"
+audio_player(audio_url, autoplay=True, loop=True)
 
-# --- Các chiêu thức ---
+# Ảnh động hiệu ứng chiêu thức
 moves = {
-    "✌️ Song kiếm trảm": {
-        "code": "scissors",
-        "img": "assets/song_kiem.gif"
-    },
-    "✊ Long quyền chưởng": {
-        "code": "rock",
-        "img": "assets/long_quyen.gif"
-    },
-    "🖐 Ngũ đao phi vũ": {
-        "code": "paper",
-        "img": "assets/ngu_dao.gif"
-    }
+    "✌️ Song kiếm trảm": "scissors",
+    "✊ Long quyền chưởng": "rock",
+    "🖐 Ngũ đao phi vũ": "paper"
 }
 
-# --- Session State ---
-if "score" not in st.session_state:
-    st.session_state.score = {"win": 0, "lose": 0, "draw": 0}
+# Session state
+if "player_score" not in st.session_state:
+    st.session_state.update({
+        "player_score": 0,
+        "bot_score": 0,
+        "draw": 0
+    })
 
-# --- Tiêu đề ---
-st.markdown("<h2 style='text-align: center;'>🧙‍♂️ Võ Lâm Tranh Đấu</h2>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center;'>Lên chiêu đi, hảo hán!</h4>", unsafe_allow_html=True)
+# Giao diện chính
+st.markdown("## 🧙‍♂️ Võ Lâm Tranh Đấu")
+st.markdown("### 🤜 Lên chiêu đi, hảo hán!")
 
-# --- Nút chọn chiêu ---
-cols = st.columns(3)
+# Chọn chiêu
+col1, col2, col3 = st.columns(3)
 player_move = None
-for idx, (label, move) in enumerate(moves.items()):
-    with cols[idx]:
-        if st.button(label):
-            player_move = move["code"]
-            st.image(move["img"], caption=label, use_column_width=True)
+with col1:
+    if st.button("✌️ Song kiếm trảm"):
+        player_move = "scissors"
+with col2:
+    if st.button("✊ Long quyền chưởng"):
+        player_move = "rock"
+with col3:
+    if st.button("🖐 Ngũ đao phi vũ"):
+        player_move = "paper"
 
-# --- Xử lý kết quả ---
+# Xử lý logic sau khi người chơi chọn
 if player_move:
-    st.markdown("### 🤖 Đối thủ đang ra chiêu...")
-    time.sleep(1.2)
-    bot_choice = random.choice(list(moves.values()))
-    bot_move = bot_choice["code"]
+    with st.spinner("⏳ Đối thủ đang xuất chiêu..."):
+        time.sleep(1.5)
+        bot_move = random.choice(["rock", "paper", "scissors"])
     
-    st.image(bot_choice["img"], caption="Chiêu của đối thủ", use_column_width=True)
-    
-    # Kết quả trận đấu
+    # Kết quả
     result = ""
     if player_move == bot_move:
-        result = "🤝 Hòa rồi!"
-        st.session_state.score["draw"] += 1
+        result = "🏵️ Hòa!"
+        st.session_state.draw += 1
     elif (player_move == "rock" and bot_move == "scissors") or \
          (player_move == "scissors" and bot_move == "paper") or \
          (player_move == "paper" and bot_move == "rock"):
-        result = "🏆 Bạn đã thắng!"
-        st.session_state.score["win"] += 1
+        result = "🏆 Bạn thắng!"
+        st.session_state.player_score += 1
     else:
-        result = "💥 Bạn thua rồi!"
-        st.session_state.score["lose"] += 1
+        result = "💥 Bạn thua!"
+        st.session_state.bot_score += 1
 
-    st.success(f"🎯 {result}")
+    # Hiển thị kết quả
+    move_display = {v: k for k, v in moves.items()}
+    st.success(f"""
+    🤖 Đối thủ ra chiêu: {move_display[bot_move]}  
+    🧘‍♂️ Bạn chọn chiêu: {move_display[player_move]}  
+    👉 Kết quả: {result}
+    """)
 
-# --- Bảng điểm ---
-st.markdown("### 📊 Kết quả hiện tại:")
-st.info(f"""✅ Thắng: {st.session_state.score["win"]}  
-❌ Thua: {st.session_state.score["lose"]}  
-🤝 Hòa: {st.session_state.score["draw"]}""")
+# Tổng kết điểm
+st.markdown("### 📊 Kết quả:")
+st.write(f"✅ Thắng: {st.session_state.player_score} | ❌ Thua: {st.session_state.bot_score} | 🤝 Hòa: {st.session_state.draw}")
 
-# --- Các nút điều khiển ---
-col1, col2, col3 = st.columns(3)
-with col1:
+# Nút điều khiển
+colA, colB, colC = st.columns(3)
+with colA:
     if st.button("🔁 Reset điểm"):
-        st.session_state.score = {"win": 0, "lose": 0, "draw": 0}
-        st.experimental_rerun()
-
-with col2:
+        st.session_state.player_score = 0
+        st.session_state.bot_score = 0
+        st.session_state.draw = 0
+with colB:
     if st.button("📜 Tổng kết"):
-        st.toast(f"🎯 Tổng kết sau trận: {st.session_state.score}")
-
-with col3:
+        st.info(f"🎯 Tổng kết: Thắng {st.session_state.player_score} - Thua {st.session_state.bot_score} - Hòa {st.session_state.draw}")
+with colC:
     if st.button("❌ Kết thúc"):
         st.stop()
