@@ -128,7 +128,6 @@ def show_summary():
     tk.Label(summary_window, text=comment, font=("Arial", 12, "italic"), bg="#fff8dc", fg="#8b4513").pack(pady=20)
 
 # Giao diện chính
-root = tk.Tk()
 root.title("⚔️ Võ Lâm Tranh Đấu")
 root.geometry("1600x900")
 root.configure(bg="#f0f4f8")
