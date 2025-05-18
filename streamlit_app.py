@@ -1,156 +1,111 @@
 import streamlit as st
 import random
-import threading
+import time
 
 # list chiêu thức và biểu tượng
 choices = ["Song kiếm trảm", "Long quyền chưởng", "Ngũ đao phi vũ"]
 icons = {"Song kiếm trảm": "✌", "Long quyền chưởng": "✊", "Ngũ đao phi vũ": "🖐"}
 
-# điểm số
-score = {"win": 0, "lose": 0, "draw": 0}
+# điểm số (sử dụng st.session_state để duy trì trạng thái)
+if 'score' not in st.session_state:
+    st.session_state['score'] = {"win": 0, "lose": 0, "draw": 0}
 
-# Hàm tính kết quả trận đấu
+# Hàm tính kết quả trận đấu (GIỮ NGUYÊN)
 def get_result(player, computer):
     if player == computer:
-        score["draw"] += 1
+        st.session_state['score']['draw'] += 1
         return "⚖️ Chiêu này ngang tài ngang sức!", "draw"
     elif (player == "Song kiếm trảm" and computer == "Ngũ đao phi vũ") or \
          (player == "Long quyền chưởng" and computer == "Song kiếm trảm") or \
          (player == "Ngũ đao phi vũ" and computer == "Long quyền chưởng"):
-        score["win"] += 1
+        st.session_state['score']['win'] += 1
         return "🏆 Không thể nào... Sao ngươi có thể học chiêu thức đó?", "win"
     else:
-        score["lose"] += 1
+        st.session_state['score']['lose'] += 1
         return "❌ Còn quá non kém. Ngươi đã bại dưới chiêu thức của ta!", "lose"
 
-# Hàm hiển thị kết quả trận đấu, hiệu ứng đổi màu nền và âm thanh
-def show_result_screen(player_choice, computer_choice, result, outcome):
-    result_window = tk.Toplevel()
-    result_window.title("⚔️ Tỉ thí võ công...")
-    result_window.geometry("1000x1000")
-
-    # Đổi màu nền cửa sổ kết quả theo outcome
+# Hàm hiển thị kết quả trận đấu (THAY ĐỔI CHO STREAMLIT)
+def show_result_screen_streamlit(player_choice, computer_choice, result, outcome):
+    st.subheader("⚔️ Kết quả tỉ thí...")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"**Ngươi xuất chiêu:** {icons[player_choice]} ({player_choice})")
+    with col2:
+        st.markdown(f"**Bổn tọa chọn chiêu:** {icons[computer_choice]} ({computer_choice})")
+    st.markdown(f"### {result}")
     if outcome == "win":
-        bg_color = "#d4edda"  # xanh nhạt
+        st.success("Ngươi đã thắng!")
     elif outcome == "lose":
-        bg_color = "#f8d7da"  # đỏ nhạt
+        st.error("Ngươi đã thua!")
     else:
-        bg_color = "#fff3cd"  # vàng nhạt
+        st.info("Hòa rồi!")
 
-    result_window.config(bg=bg_color)
-
-    player_line = tk.Frame(result_window, bg=bg_color)
-    player_line.pack(pady=10)
-    tk.Label(player_line, text="Ngươi xuất chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
-    tk.Label(player_line, text=icons[player_choice], font=("Arial", 50), bg=bg_color).pack(side="left")
-
-    comp_line = tk.Frame(result_window, bg=bg_color)
-    comp_line.pack(pady=10)
-    tk.Label(comp_line, text="Bổn tọa chọn chiêu:", font=("Arial", 14), bg=bg_color).pack(side="left", padx=(0, 10))
-    comp_icon = tk.Label(comp_line, text="❓", font=("Arial", 50), bg=bg_color)
-    comp_icon.pack(side="left")
-
-    result_label = tk.Label(result_window, text="", font=("Arial", 16, "bold"), bg=bg_color)
-    result_label.pack(pady=20)
-
-    button_container = tk.Frame(result_window, bg=bg_color)
-    button_container.pack(pady=10)
-
-    # Phát âm thanh theo kết quả trong thread riêng tránh gián đoạn GUI
-    def play_sound_for_outcome():
-        try:
-            if outcome == "win":
-                playsound('sounds/win_sound.mp3')
-            elif outcome == "lose":
-                playsound('sounds/lose_sound.mp3')
-            else:
-                playsound('sounds/draw_sound.mp3')
-        except:
-            pass
-
-    def roll(count=0):
-        if count < 30:
-            comp_icon.config(text=icons[random.choice(choices)])
-            result_window.after(50, lambda: roll(count + 1))
-        else:
-            comp_icon.config(text=icons[computer_choice])
-            result_label.config(
-                text=result,
-                fg="green" if outcome == "win" else "red" if outcome == "lose" else "orange"
-            )
-            threading.Thread(target=play_sound_for_outcome).start()
-
-            if outcome == "win":
-                btn = tk.Button(button_container, text="💥 Đòn tiếp theo", bg="#198754", fg="white", command=result_window.destroy)
-            elif outcome == "lose":
-                btn = tk.Button(button_container, text="🌀 Phục thù!", bg="#dc3545", fg="white", command=result_window.destroy)
-            else:
-                btn = tk.Button(button_container, text="🧘 Tiếp chiêu đi", bg="#ffc107", fg="black", command=result_window.destroy)
-            btn.pack(pady=10)
-
-    result_window.after(200, roll)
-
-# Xử lý khi người chơi chọn chiêu
-def play(choice):
+# Xử lý khi người chơi chọn chiêu (THAY ĐỔI CHO STREAMLIT)
+def play_streamlit(choice):
     computer_choice = random.choice(choices)
     result, outcome = get_result(choice, computer_choice)
+    st.session_state['player_choice'] = choice
+    st.session_state['computer_choice'] = computer_choice
+    st.session_state['result'] = result
+    st.session_state['outcome'] = outcome
 
-    player_choice_label.config(text=f"👤 Ngươi ra chiêu: {choice}")
-    result_label.config(text="🤖 Lên chiêu đi, hảo hán!", fg="#666")
-    score_label.config(text=f"✅ Thắng: {score['win']} | ❌ Bại: {score['lose']} | ⚖️ Hòa: {score['draw']}")
-
-    show_result_screen(choice, computer_choice, result, outcome)
-
-# Đặt lại điểm số
+# Đặt lại điểm số (GIỮ NGUYÊN)
 def reset_score():
-    score.update({"win": 0, "lose": 0, "draw": 0})
-    score_label.config(text="✅ Thắng: 0 | ❌ Bại: 0 | ⚖️ Hòa: 0")
-    result_label.config(text="🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha", fg="#0077b6")
-    player_choice_label.config(text="👤 Ngươi ra chiêu: ")
+    st.session_state['score'] = {"win": 0, "lose": 0, "draw": 0}
+    st.session_state['player_choice'] = ""
+    st.session_state['computer_choice'] = ""
+    st.session_state['result'] = ""
+    st.session_state['outcome'] = ""
 
-# Hiển thị tổng kết
-def show_summary():
-    summary_window = tk.Toplevel()
-    summary_window.title("📜 Kết quả tỉ thí võ công")
-    summary_window.geometry("1600x1000")
-    summary_window.config(bg="#fff8dc")
+# Hiển thị tổng kết (THAY ĐỔI CHO STREAMLIT)
+def show_summary_streamlit():
+    st.subheader("📜 Kết quả tỉ thí võ công")
+    st.markdown(f"**✅ Thắng:** {st.session_state['score']['win']} | **❌ Bại:** {st.session_state['score']['lose']} | **⚖️ Hòa:** {st.session_state['score']['draw']}")
 
-    tk.Label(summary_window, text="📜 Kết quả tỉ thí:", font=("Arial", 16, "bold"), bg="#fff8dc").pack(pady=10)
-    tk.Label(summary_window, text=f"✅ Thắng: {score['win']} | ❌ Bại: {score['lose']} | ⚖️ Hòa: {score['draw']}", font=("Arial", 14), bg="#fff8dc").pack(pady=10)
-
-    if score["win"] > score["lose"]:
+    if st.session_state['score']['win'] > st.session_state['score']['lose']:
         comment = "🔥 Không thể nào...ta đã thua. Ngươi quả là cao thủ, bổn tọa bái phục!"
-    elif score["win"] < score["lose"]:
+    elif st.session_state['score']['win'] < st.session_state['score']['lose']:
         comment = "🌪 Võ công của ngươi chưa đủ wow, ta tha mạng cho nhà ngươi!"
     else:
         comment = "⚖️ Thế cục ngang tài ngang sức, tái đấu mới rõ anh hùng!"
+    st.info(comment)
 
-    tk.Label(summary_window, text=comment, font=("Arial", 12, "italic"), bg="#fff8dc", fg="#8b4513").pack(pady=20)
+# Giao diện Streamlit
+st.title("⚔️ Võ Lâm Tranh Đấu")
 
-# Giao diện chính
-root.title("⚔️ Võ Lâm Tranh Đấu")
-root.geometry("1600x900")
-root.configure(bg="#f0f4f8")
+st.markdown("---")
 
-tk.Label(root, text="🕹 Võ Lâm Tranh Đấu", font=("Arial", 20, "bold"), bg="#f0f4f8", fg="#333").pack(pady=20)
+st.markdown(f"**Điểm số:** ✅ {st.session_state['score']['win']} | ❌ {st.session_state['score']['lose']} | ⚖️ {st.session_state['score']['draw']}")
 
-player_choice_label = tk.Label(root, text="👤 Ngươi ra chiêu: ", font=("Arial", 14), bg="#f0f4f8")
-player_choice_label.pack(pady=10)
+st.markdown("---")
 
-result_label = tk.Label(root, text="🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha", font=("Arial", 14), bg="#f0f4f8", fg="#0077b6")
-result_label.pack(pady=10)
+col_buttons = st.columns(3)
+if col_buttons[0].button(f"✌ {choices[0]}"):
+    play_streamlit(choices[0])
+if col_buttons[1].button(f"✊ {choices[1]}"):
+    play_streamlit(choices[1])
+if col_buttons[2].button(f"🖐 {choices[2]}"):
+    play_streamlit(choices[2])
 
-score_label = tk.Label(root, text="✅ Thắng: 0 | ❌ Bại: 0 | ⚖️ Hòa: 0", font=("Arial", 13), bg="#f0f4f8", fg="#444")
-score_label.pack(pady=10)
+st.markdown("---")
 
-button_frame = tk.Frame(root, bg="#f0f4f8")
-button_frame.pack(pady=20)
+if 'result' in st.session_state and st.session_state['result']:
+    show_result_screen_streamlit(st.session_state['player_choice'], st.session_state['computer_choice'], st.session_state['result'], st.session_state['outcome'])
+else:
+    st.info("🤖 Xuất chiêu đi, ta chưa ngán ai bao giờ hahahahaha")
 
-tk.Button(button_frame, text="✌ Song kiếm trảm", width=20, font=("Arial", 20), command=lambda: play("Song kiếm trảm")).grid(row=0, column=0, padx=10)
-tk.Button(button_frame, text="✊ Long quyền chưởng", width=20, font=("Arial", 20), command=lambda: play("Long quyền chưởng")).grid(row=0, column=1, padx=10)
-tk.Button(button_frame, text="🖐 Ngũ đao phi vũ", width=20, font=("Arial", 20), command=lambda: play("Ngũ đao phi vũ")).grid(row=0, column=2,)
+st.markdown("---")
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+col_reset_summary = st.columns(2)
+if col_reset_summary[0].button("🔄 Đặt lại điểm"):
+    reset_score()
+if col_reset_summary[1].button("📊 Xem tổng kết"):
+    show_summary_streamlit()
+
+if 'outcome' in st.session_state:
+    if st.session_state['outcome'] == "win":
+        st.balloons()
+    elif st.session_state['outcome'] == "lose":
+        st.warning("Cố gắng lên ở trận sau nhé!")
+    elif st.session_state['outcome'] == "draw":
+        st.info("Một trận hòa cân sức!")
